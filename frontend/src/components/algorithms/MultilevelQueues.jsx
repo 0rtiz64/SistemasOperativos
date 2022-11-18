@@ -39,9 +39,9 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
         let seconds = 0; //Tiempo de cpu transcurrido
         let blockeds = [];
 
-        let queue1 = ready.filter(item => item.queue === 1);
-        let queue2 = ready.filter(item => item.queue === 2);
-        let queue3 = ready.filter(item => item.queue === 3);
+        let median = Math.round(ready.length / 2);
+        let queue1 = ready.slice(0, median);
+        let queue2 = ready.slice(median, ready.length);
 
         const SJF = (ready) => {
             do {
@@ -145,38 +145,35 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
         }
 
         SJF(queue1);
-        SJF(queue2);
-        RR(queue3);
+        RR(queue2);
         setRows(processes);
 
-        setRows([...processes].sort((process1, process2) => {
-            if (process1.arrivalTime > process2.arrivalTime) return 1;
-            if (process1.arrivalTime < process2.arrivalTime) return -1;
-            return 0;
-        }));
-        setRows([...processes].sort((process1, process2) => {
+        //Ordenamos segun el orden de ejecución
+        setRows(rows => rows = rows.sort((process1, process2) => {
             if (process1.movements[0][0] > process2.movements[0][0]) return 1;
             if (process1.movements[0][0] < process2.movements[0][0]) return -1;
+            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return 1;
+            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return -1;
             return 0;
-        }));
+        }))
 
         let greater = 0;
 
         for (let j = 0; j < processes.length; j++) {
-          let item = processes[j];
-    
-          if (item.movements[item.movements.length - 1][1] > greater) {
-            greater = item.movements[item.movements.length - 1][1];
-          }
+            let item = processes[j];
+
+            if (item.movements[item.movements.length - 1][1] > greater) {
+                greater = item.movements[item.movements.length - 1][1];
+            }
         }
-    
+
         setGreater(greater);
-    
+
     }, [processes, setProcesses, quantum])
 
     return (
-        <TableContent greater={greater} rows={rows} processes={processes}/>
-      )
+        <TableContent greater={greater} rows={rows} processes={processes} />
+    )
 }
 
 export default MultilevelQueues

@@ -57,8 +57,8 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
                     running = { ...ready[index] };
                 }
 
-                if (flag) processStatesHistory.push({ id: running.id, timeElapse: seconds, state: "Listo" });
-                processStatesHistory.push({ id: running.id, timeElapse: seconds, state: "Ejecución" });
+                if (flag) processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
+                processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Ejecución" });
 
                 if (quantum <= running.cpu) { //Restamos el tiempo de cpu
                     running.cpu -= quantum;
@@ -90,15 +90,15 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
                     tempRows.push(processes[processesIndex]);
                     setRows(tempRows);
                     ready.splice(index, 1);
-                    processStatesHistory.push({ id: running.id, timeElapse: seconds, state: "Terminado" });
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Terminado" });
                 } else if (running.cpu > quantum) {
                     blockeds.push({ ...running });
                     ready.splice(index, 1);
-                    processStatesHistory.push({ id: running.id, timeElapse: seconds, state: "Bloqueado" });
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Bloqueado" });
 
                 } else {
                     ready[index].cpu = running.cpu;
-                    processStatesHistory.push({ id: running.id, timeElapse: seconds, state: "Listo" });
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
                 }
 
                 setProcesses(tempProcesses);
@@ -118,6 +118,15 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
                 greater = item.movements[item.movements.length - 1][1];
             }
         }
+
+        setRows(rows => rows = rows.sort((process1, process2) => {
+            if (process1.movements[0][0] > process2.movements[0][0]) return 1;
+            if (process1.movements[0][0] < process2.movements[0][0]) return -1;
+            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return 1;
+            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return -1;
+            return 0;
+        }))
+
 
         setGreater(greater);
 

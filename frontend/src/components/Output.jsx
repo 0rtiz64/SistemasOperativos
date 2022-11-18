@@ -35,7 +35,7 @@ const Output = ({ outputRef, selectedAlgorithm, processes, setProcesses, quantum
                         <div className="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
                         </div>
 
-                        <div className="tab-pane fade mt-2" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+                        <div className="tab-pane fade mt-2 table-responsive " id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
                             <Graphic selectedAlgorithm={selectedAlgorithm} processes={processes} setProcesses={setProcesses} quantum={quantum} />
                         </div>
                     </div>

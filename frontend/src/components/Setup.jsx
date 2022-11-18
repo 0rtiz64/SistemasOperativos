@@ -23,7 +23,7 @@ const Inputs = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, se
     }, [])
 
     useEffect(() => {
-        if(selectedThread === ""){
+        if (selectedThread === "") {
             setProcesses([]);
             return;
         }
@@ -43,6 +43,10 @@ const Inputs = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, se
     const onSubmit = (e) => {
         e.preventDefault();
 
+        if (e.target.id !== 'setup') {
+            return;
+        }
+
         let tempProcessesList = [];
         tempProcessesList = processes.map((item, index) => {
             return {
@@ -54,7 +58,6 @@ const Inputs = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, se
                 tickets: 0,
                 movements: [],
                 usedTime: 0,
-                states: ["Listo"],
             }
         })
 
@@ -62,11 +65,11 @@ const Inputs = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, se
         setQuantum(data.quantum);
         setProcessesList([...tempProcessesList]);
 
-        outputRef.current?.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
+        outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
     }
 
     return (
-        <form onSubmit={(e) => onSubmit(e)} className='p-4 bg-white shadow rounded-border mb-4'>
+        <form id='setup' onSubmit={(e) => onSubmit(e)} className='p-4 bg-white shadow rounded-border mb-4'>
             <label className='small mt-3'><strong>Configuración</strong></label>
             <hr className='mb-2 mt-1' />
             <div className='d-flex flex-row'>
@@ -79,7 +82,7 @@ const Inputs = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, se
                         })}
                     </select>
                 </div>
-                <button className="btn btn-secondary mt-auto" onClick={() => setShowAddThreadModal(true)}>Agregar hilo</button>
+                <button type='button' className="btn btn-secondary mt-auto" onClick={() => setShowAddThreadModal(true)}>Agregar hilo</button>
                 <AddThreadModal threads={threads} setThreads={setThreads} showAddThreadModal={showAddThreadModal} setShowAddThreadModal={setShowAddThreadModal} />
             </div>
             <div className='d-flex flex-row'>
@@ -109,13 +112,13 @@ const Inputs = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, se
                 </div>
             </div>
             <div className="d-flex flex-row mt-3">
-                <button role={'link'} href='output' className="form-control btn btn-primary" type='submit'>Ejecutar</button>
+                <button form='setup' id='run' role={'link'} href='output' className="form-control btn btn-primary" type='submit'>Ejecutar</button>
             </div>
             {processes.length !== 0 &&
                 <React.Fragment>
                     <label className='small mt-3'><strong>Procesos a ejecutar</strong></label>
                     <hr className='mb-2 mt-1' />
-                    <div className="d-flex flex-row">
+                    <div className="d-flex flex-row table-responsive">
                         <ProcessesTable processes={processes} />
                     </div>
                 </React.Fragment>

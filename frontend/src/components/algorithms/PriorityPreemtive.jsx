@@ -184,24 +184,33 @@ const PriorityPreemtive = ({ processes, setProcesses }) => {
         //Ordenamos en orden de llegada para mostrar en el grafico
         setRows(processes);
 
+        //Ordenamos segun el orden de ejecución
+        setRows(rows => rows = rows.sort((process1, process2) => {
+            if (process1.movements[0][0] > process2.movements[0][0]) return 1;
+            if (process1.movements[0][0] < process2.movements[0][0]) return -1;
+            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return 1;
+            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return -1;
+            return 0;
+        }))
+
         let greater = 0;
 
         for (let j = 0; j < processes.length; j++) {
-          let item = processes[j];
-    
-          if (item.movements[item.movements.length - 1][1] > greater) {
-            greater = item.movements[item.movements.length - 1][1];
-          }
+            let item = processes[j];
+
+            if (item.movements[item.movements.length - 1][1] > greater) {
+                greater = item.movements[item.movements.length - 1][1];
+            }
         }
-    
+
         setGreater(greater);
-    
+
     }, [processes, setProcesses]);
 
 
     return (
-        <TableContent greater={greater} rows={rows} processes={processes}/>
-      )
+        <TableContent greater={greater} rows={rows} processes={processes} />
+    )
 }
 
 export default PriorityPreemtive

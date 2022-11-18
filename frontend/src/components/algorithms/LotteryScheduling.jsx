@@ -123,6 +123,14 @@ const LotteryScheduling = ({ processes, setProcesses, quantum }) => {
         }
         resolve();
 
+        setRows(rows => rows = rows.sort((process1, process2) => {
+            if (process1.movements[0][0] > process2.movements[0][0]) return 1;
+            if (process1.movements[0][0] < process2.movements[0][0]) return -1;
+            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return 1;
+            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return -1;
+            return 0;
+        }))
+
         let greater = 0;
 
         for (let j = 0; j < processes.length; j++) {
