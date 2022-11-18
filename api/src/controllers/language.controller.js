@@ -59,7 +59,7 @@ const insertHilo = async (req, res) => {
         
         //Insertar Procesos
         procesos.map((proceso)=>{
-            const result3 =  connection.query("INSERT INTO detallehilo (idProceso,cpu,prioridad,estado,idHilo,tLlegada) VALUES ("+proceso.idProceso+","+proceso.cpu+","+proceso.prioridad+",1,"+id+","+proceso.tiempoLlegada+")");
+            const result3 =  connection.query("INSERT INTO detallehilo (idProceso,cpu,prioridad,estado,idHilo,tLlegada) VALUES ("+proceso.idProceso+","+proceso.cpu+","+proceso.prioridad+",1,"+id+","+proceso.tLlegada+")");
         });
 
 
