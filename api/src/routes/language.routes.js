@@ -24,5 +24,6 @@ router.use(cors(corsOptionsDelegate));
 router.get("/procesos", languageController.getProcesos);
 router.get("/hilos", languageController.getHilos);
 router.get("/hilos/:id", languageController.getDetalleHilo);
+router.post("/hilos", languageController.insertHilo);
 
 export default router;
