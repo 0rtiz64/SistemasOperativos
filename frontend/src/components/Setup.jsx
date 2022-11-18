@@ -118,7 +118,7 @@ const Inputs = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, se
                 <React.Fragment>
                     <label className='small mt-3'><strong>Procesos a ejecutar</strong></label>
                     <hr className='mb-2 mt-1' />
-                    <div className="d-flex flex-row table-responsive">
+                    <div className="d-flex flex-row table-responsive table-wrapper">
                         <ProcessesTable processes={processes} />
                     </div>
                 </React.Fragment>

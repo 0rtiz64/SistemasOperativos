@@ -27,8 +27,6 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
     }
 
     useEffect(() => {
-        console.log(quantum);
-
         const resolve = () => {
             let tempRows = [];
             let ready = processes.map(item => ({ ...item }));  //Lista de listos
@@ -102,7 +100,7 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
                 }
 
                 setProcesses(tempProcesses);
-                console.log(processStatesHistory);
+                //console.log(processStatesHistory);
 
             } while (ready.length !== 0 || blockeds.length !== 0);
         }
@@ -122,8 +120,8 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
         setRows(rows => rows = rows.sort((process1, process2) => {
             if (process1.movements[0][0] > process2.movements[0][0]) return 1;
             if (process1.movements[0][0] < process2.movements[0][0]) return -1;
-            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return 1;
-            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return -1;
+            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return 1;
+            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return -1;
             return 0;
         }))
 

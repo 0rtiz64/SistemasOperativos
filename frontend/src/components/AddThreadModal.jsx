@@ -53,7 +53,7 @@ const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, threads, se
         setProcesses([...processes].filter(item => item.idproceso !== parseInt(data.process)));
 
         setData({
-            ...data, 
+            ...data,
             process: '',
             arrivalTime: '',
             cpu: '',
@@ -61,9 +61,23 @@ const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, threads, se
         })
     }
 
-    const addThread = (e) => {
+    const addThread = async (e) => {
         e.preventDefault();
-        //let payload = { nombreHilo: data.threadName, processes: thread } //Data para el fetch
+
+        let payload = { nombreHilo: data.threadName, procesos: thread } //Data para el fetch
+
+        await fetch('http://localhost:4000/api/languages/hilos', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        }).then(res => {
+            if(res.status === 200){
+                window.location.reload(false);
+            }
+        })
     }
 
 

@@ -1,7 +1,9 @@
 import React from 'react'
+import Details from './Details'
 import Graphic from './Graphic'
 
 const Output = ({ outputRef, selectedAlgorithm, processes, setProcesses, quantum }) => {
+    
     return (
         <React.Fragment>
             <div ref={outputRef} className='p-3 bg-white border shadow rounded-border' id="output">
@@ -15,7 +17,9 @@ const Output = ({ outputRef, selectedAlgorithm, processes, setProcesses, quantum
                         <button className="nav-link text-dark" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Detalles</button>
                         <button className="nav-link text-dark" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Gráfico</button>
                     </div>
-                    <div className="tab-content" id="myTabContent">
+                    {
+                        processes.length !== 0 ?
+                        <div className="tab-content" id="myTabContent">
                         <div className="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
                             <table className="table table-sm table-bordered" >
                                 <thead className='bg-light'>
@@ -32,13 +36,19 @@ const Output = ({ outputRef, selectedAlgorithm, processes, setProcesses, quantum
                             </table>
                         </div>
 
-                        <div className="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-                        </div>
-
                         <div className="tab-pane fade mt-2 table-responsive " id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
                             <Graphic selectedAlgorithm={selectedAlgorithm} processes={processes} setProcesses={setProcesses} quantum={quantum} />
                         </div>
+
+                        <div className="tab-pane fade table-responsive" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                            <Details processes={processes}/>
+                        </div>
                     </div>
+                    :
+                    <div className='text-center text-muted m-3'>
+                        La tabla, gráfica y estadísticas se mostraran aquí.
+                    </div>    
+                }
 
                 </section>
             </div>
