@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import TableContent from '../TableContent';
 
 
-const PriorityScheduling = ({ processes, setProcesses, quantum }) => {
+const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, quantum }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
@@ -32,6 +32,8 @@ const PriorityScheduling = ({ processes, setProcesses, quantum }) => {
             return;
         }
 
+        let processStatesHistory = [];
+
         const resolve = () => {
             let tempRows = [];
             let ready = processes.map(item => ({ ...item }));  //Lista de listos
@@ -41,20 +43,26 @@ const PriorityScheduling = ({ processes, setProcesses, quantum }) => {
 
             do {
                 let index = 0;
+                let flag = false;
 
                 if (blockeds.length === 1 && ready.length === 0) {
                     ready.push({ ...blockeds[0] });
                     running = { ...blockeds[0] };
                     blockeds = [];
+                    flag = true;
                 } else if (blockeds.length > 1 || (blockeds.length === 1 && blockeds[0].id !== running.id)) {
                     index = nextProcess(blockeds, running);
                     running = { ...blockeds[index] };
                     ready.push({ ...blockeds[index] });
                     blockeds.splice(index, 1);
+                    flag = true;
                 } else {
                     index = nextProcess(ready, running);
                     running = { ...ready[index] };
                 }
+
+                if (flag) processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
+                processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Ejecución" });
 
                 if (quantum <= running.cpu) { //Restamos el tiempo de cpu
                     running.cpu -= quantum;
@@ -87,17 +95,21 @@ const PriorityScheduling = ({ processes, setProcesses, quantum }) => {
                     tempRows.push(processes[processesIndex]);
                     setRows(tempRows);
                     ready.splice(index, 1);
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Terminado" });
                 } else if (running.cpu > quantum) {
                     blockeds.push({ ...running });
                     ready.splice(index, 1);
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Bloqueado" });
                 } else {
                     ready[index].cpu = running.cpu;
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
                 }
 
             } while (ready.length !== 0 || blockeds.length !== 0);
         }
 
         resolve();
+        setProcessStatesHistory(processStatesHistory);
 
         //Ordenamos segun el orden de ejecución
         setRows(rows => rows = rows.sort((process1, process2) => {
@@ -119,7 +131,7 @@ const PriorityScheduling = ({ processes, setProcesses, quantum }) => {
         }
 
         setGreater(greater);
-    }, [processes, setProcesses, quantum])
+    }, [processes, setProcesses, quantum, setProcessStatesHistory])
 
     return (
         <TableContent greater={greater} rows={rows} processes={processes} />

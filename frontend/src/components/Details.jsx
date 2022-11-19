@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
-const Details = ({ processes }) => {
-    const [statistics, setStatistics] = useState({ firstOneRunned: null, lastOneRunned: null, lastOneFinished: null, avgWaitingTime: null });
+const Details = ({ processes, quantum }) => {
+    const [statistics, setStatistics] = useState({ firstOneRunned: null, lastOneRunned: null, lastOneFinished: null, blockeds: null });
 
     useEffect(() => {
         if (processes[0] === undefined) return;
@@ -9,8 +9,9 @@ const Details = ({ processes }) => {
         let firstOneRunned = processes[0];
         let lastOneRunned = processes[0];
         let lastOneFinished = processes[0];
+        let blockeds = 0;
 
-        const firstLast = () => {
+        const getStatistics = () => {
             if (processes.length === 0) return;
 
             for (let i = 0; i < processes.length; i++) {
@@ -27,14 +28,17 @@ const Details = ({ processes }) => {
                 if (item.movements[item.movements.length - 1][1] > lastOneFinished.movements[lastOneFinished.movements.length - 1][1]) {
                     lastOneFinished = item;
                 }
+
+                if (item.cpu - quantum > quantum) {
+                    blockeds++;
+                }
             }
 
-            return { firstOneRunned, lastOneRunned, lastOneFinished }
+            return { firstOneRunned, lastOneRunned, lastOneFinished, blockeds }
         }
-        
-        setStatistics(firstLast())
 
-    }, [processes])
+        setStatistics(getStatistics())
+    }, [processes, quantum])
 
 
     return (
@@ -62,6 +66,14 @@ const Details = ({ processes }) => {
                     </th>
                     <td>
                         {statistics.lastOneFinished !== null && statistics.lastOneFinished.name}
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Procesos bloqueados
+                    </th>
+                    <td>
+                        {statistics.blockeds !== null && statistics.blockeds}
                     </td>
                 </tr>
             </tbody>

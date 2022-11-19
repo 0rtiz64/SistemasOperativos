@@ -1,5 +1,5 @@
 import Footer from "./layout/Footer";
-import Inputs from "./components/Setup";
+import Input from "./components/Input";
 import Modal from 'react-modal';
 import '../src/style.css'
 import Output from "./components/Output";
@@ -9,13 +9,14 @@ Modal.setAppElement("#root");
 const App = () => {
   const [processesList, setProcessesList] = useState([]);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('1');
+  const [processStatesHistory, setProcessStatesHistory] = useState([]);
   const [quantum, setQuantum] = useState("");
   const outputRef = useRef(null);
 
   return (
     <div className="App">
       <div className='d-flex flex-column container mt-5'>
-        <Inputs
+        <Input
           outputRef={outputRef}
           processesList={processesList}
           setProcessesList={setProcessesList}
@@ -23,6 +24,8 @@ const App = () => {
           setSelectedAlgorithm={setSelectedAlgorithm}
           quantum={quantum}
           setQuantum={setQuantum}
+          processStatesHistory={processStatesHistory}
+          setProcessStatesHistory={setProcessStatesHistory}
         />
         <Output
           outputRef={outputRef}
@@ -30,6 +33,8 @@ const App = () => {
           setProcesses={setProcessesList}
           selectedAlgorithm={selectedAlgorithm}
           quantum={quantum}
+          processStatesHistory={processStatesHistory}
+          setProcessStatesHistory={setProcessStatesHistory}
         />
       </div>
       <Footer />

@@ -8,25 +8,25 @@ import RoundRobin from './algorithms/RoundRobin'
 import ShortestJobFirst from './algorithms/ShortestJobFirst'
 import ShortestJobFirstNP from './algorithms/ShortestJobFirstNP'
 
-const Graphic = ({ selectedAlgorithm, processes, setProcesses, quantum }) => {
+const Graphic = ({ setProcessStatesHistory, selectedAlgorithm, processes, setProcesses, quantum }) => {
     const getGraphic = () => {
         switch (selectedAlgorithm) {
             case "1":
-                return <ShortestJobFirst processes={processes} setProcesses={setProcesses} quantum={quantum} />
+                return <ShortestJobFirst setProcessStatesHistory={setProcessStatesHistory} processes={processes} setProcesses={setProcesses} quantum={quantum} />
             case "2":
-                return <PriorityScheduling processes={processes} setProcesses={setProcesses} quantum={quantum} />
+                return <PriorityScheduling setProcessStatesHistory={setProcessStatesHistory}  processes={processes} setProcesses={setProcesses} quantum={quantum} />
             case "3":
-                return <LotteryScheduling processes={processes} setProcesses={setProcesses} quantum={quantum} />
+                return <LotteryScheduling setProcessStatesHistory={setProcessStatesHistory}  processes={processes} setProcesses={setProcesses} quantum={quantum} />
             case "4":
-                return <ShortestJobFirstNP processes={processes} setProcesses={setProcesses} quantum={quantum} />
+                return <ShortestJobFirstNP setProcessStatesHistory={setProcessStatesHistory}  processes={processes} setProcesses={setProcesses} quantum={quantum} />
             case "5":
-                return <RoundRobin processes={processes} setProcesses={setProcesses} quantum={quantum} />
+                return <RoundRobin setProcessStatesHistory={setProcessStatesHistory}  processes={processes} setProcesses={setProcesses} quantum={quantum} />
             case "6":
-                return <PriorityPreemtive processes={processes} setProcesses={setProcesses} quantum={quantum} />
+                return <PriorityPreemtive setProcessStatesHistory={setProcessStatesHistory}  processes={processes} setProcesses={setProcesses} quantum={quantum} />
             case "7":
-                return <MultilevelQueues processes={processes} setProcesses={setProcesses} quantum={quantum} />
+                return <MultilevelQueues setProcessStatesHistory={setProcessStatesHistory}  processes={processes} setProcesses={setProcesses} quantum={quantum} />
             case "8":
-                return <GuaranteedScheduling processes={processes} setProcesses={setProcesses} quantum={quantum} />
+                return <GuaranteedScheduling setProcessStatesHistory={setProcessStatesHistory}  processes={processes} setProcesses={setProcesses} quantum={quantum} />
             default:
                 break;
         }

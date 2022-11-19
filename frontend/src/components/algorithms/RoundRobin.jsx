@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import TableContent from '../TableContent';
 
 
-const RoundRobin = ({ processes, quantum }) => {
+const RoundRobin = ({ setProcessStatesHistory, processes, quantum }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
@@ -11,6 +11,9 @@ const RoundRobin = ({ processes, quantum }) => {
             setRows([]);
             return;
         }
+
+        let processStatesHistory = [];
+
 
         const resolve = () => {
             let j = 0, time, i;
@@ -26,16 +29,27 @@ const RoundRobin = ({ processes, quantum }) => {
             let seconds = 0;
 
             for (i = 0; j < processes.length; i = (i + 1) % processes.length) {
+
                 if (ready[i].arrivalTime !== 0 && seconds === 0) {
                     seconds += ready[i].arrivalTime;
                 }
 
+
                 if (ready[i].cpu > 0 && seconds >= ready[i].arrivalTime) {
+                    if (ready[i].blocked === true) {
+                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Listo" });
+                        ready[i].blocked = false;
+                    }
+
+                    processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Ejecución" });
+
                     flag = true;
                     if (ready[i].cpu <= quantum) {
                         time = ready[i].cpu;
+                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds + time, state: "Terminado" });
                     } else {
                         time = quantum;
+                        if (ready[i].cpu - quantum <= quantum) processStatesHistory.push({ name: ready[i].name, timeElapse: seconds + time, state: "Listo" });
                     }
 
                     ready[i].movements.push([seconds, seconds + time])
@@ -46,6 +60,12 @@ const RoundRobin = ({ processes, quantum }) => {
                     }
 
                     seconds += time;
+
+                    if (ready[i].cpu > quantum) {
+                        ready[i].blocked = true;
+                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Bloqueado" });
+                    }
+
                 }
                 if (i === processes.length - 1) {
                     if (!flag) {
@@ -70,6 +90,7 @@ const RoundRobin = ({ processes, quantum }) => {
         }
 
         resolve();
+        setProcessStatesHistory(processStatesHistory);
 
         //Ordenamos segun el orden de ejecución
         setRows(rows => rows = rows.sort((process1, process2) => {
@@ -92,7 +113,7 @@ const RoundRobin = ({ processes, quantum }) => {
 
         setGreater(greater);
 
-    }, [processes, quantum]);
+    }, [processes, quantum, setProcessStatesHistory]);
 
     return (
         <TableContent greater={greater} rows={rows} processes={processes} />

@@ -2,7 +2,7 @@ import React from 'react'
 import { useEffect, useState } from 'react';
 import TableContent from '../TableContent';
 
-const GuaranteedScheduling = ({ processes, setProcesses, quantum }) => {
+const GuaranteedScheduling = ({ setProcessStatesHistory, processes, setProcesses, quantum }) => {
   const [rows, setRows] = useState([]);
   const [greater, setGreater] = useState([]);
 
@@ -11,9 +11,9 @@ const GuaranteedScheduling = ({ processes, setProcesses, quantum }) => {
     let nonArrived = readyQueue.filter(item => item.arrivalTime > timeElapse);
 
     let next = alredyArrived[0];
-    if (timeElapse === 0 && alredyArrived.length !== 0){
+    if (timeElapse === 0 && alredyArrived.length !== 0) {
       return [{ ...next }, timeElapse]
-    }else if(timeElapse === 0 && nonArrived.length !== 0){
+    } else if (timeElapse === 0 && nonArrived.length !== 0) {
       next = nonArrived[0];
       timeElapse = nonArrived[0].arrivalTime;
       return [{ ...next }, timeElapse]
@@ -42,6 +42,8 @@ const GuaranteedScheduling = ({ processes, setProcesses, quantum }) => {
       return;
     }
 
+    let processStatesHistory = [];
+
     const resolve = () => {
       let readyQueue = processes.map(item => { return { ...item } });
 
@@ -58,6 +60,8 @@ const GuaranteedScheduling = ({ processes, setProcesses, quantum }) => {
         let aux = nextProcess(readyQueue, timeElapse);
         runningProcess = aux[0];
         timeElapse = aux[1];
+
+        processStatesHistory.push({ name: runningProcess.name, timeElapse, state: "Ejecución" });
 
         //Al proceso le asignamos el tiempo de quantum
         let time;
@@ -96,13 +100,17 @@ const GuaranteedScheduling = ({ processes, setProcesses, quantum }) => {
 
         if (runningProcess.cpu === 0) {
           readyQueue.splice(index, 1);
+          processStatesHistory.push({ name: runningProcess.name, timeElapse, state: "Terminado" });
         } else {
           readyQueue[index] = runningProcess;
+          processStatesHistory.push({ name: runningProcess.name, timeElapse, state: "Listo" });
         }
       } while (readyQueue.length !== 0);
     }
 
     resolve();
+    setProcessStatesHistory(processStatesHistory);
+
     setRows(processes);
     setRows(rows => rows = rows.sort((process1, process2) => {
       if (process1.movements[0][0] > process2.movements[0][0]) return 1;
@@ -124,11 +132,11 @@ const GuaranteedScheduling = ({ processes, setProcesses, quantum }) => {
 
     setGreater(greater);
 
-  }, [processes, setProcesses, quantum])
+  }, [processes, setProcesses, quantum, setProcessStatesHistory])
 
 
   return (
-    <TableContent greater={greater} rows={rows} processes={processes}/>
+    <TableContent greater={greater} rows={rows} processes={processes} />
   )
 }
 

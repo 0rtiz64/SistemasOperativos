@@ -15,7 +15,7 @@ const customStyles = {
     },
 };
 
-const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, threads, setThreads }) => {
+const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, setTrigger, trigger }) => {
     const [data, setData] = useState({ threadName: '', process: '', arrivalTime: '', cpu: '', priority: '' });
     const [processes, setProcesses] = useState([]);
     const [thread, setThread] = useState([]);
@@ -35,7 +35,7 @@ const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, threads, se
                 })
         }
         getProcesses();
-    }, [])
+    }, [trigger])
 
     const addToThread = (e) => {
         e.preventDefault();
@@ -46,7 +46,7 @@ const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, threads, se
             nombreProceso: processes.find((item) => item.idproceso === parseInt(data.process)).nombreProceso,
             tLlegada: data.arrivalTime !== "" ? parseInt(data.arrivalTime) : 0,
             cpu: parseInt(data.cpu),
-            prioridad: data.arrivalTime !== "" ? parseInt(data.priority) : 1
+            prioridad: data.priority !== "" ? parseInt(data.priority) : 1
         });
         setThread(tempThread);
 
@@ -74,15 +74,27 @@ const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, threads, se
             },
             body: JSON.stringify(payload)
         }).then(res => {
-            if(res.status === 200){
-                window.location.reload(false);
+            if (res.status === 200) {
+                setTrigger(!trigger);
+                setShowAddThreadModal(false);
             }
+        })
+    }
+
+    const onModalClose = () => {
+        setThread([]);
+        setData({
+            threadName: '',
+            process: '',
+            arrivalTime: '',
+            cpu: '',
+            priority: ''
         })
     }
 
 
     return (
-        <Modal style={customStyles} isOpen={showAddThreadModal} closeTimeoutMS={500} shouldCloseOnEsc={true} shouldCloseOnOverlayClick={true} onRequestClose={() => setShowAddThreadModal(false)}>
+        <Modal onAfterClose={() => onModalClose()} style={customStyles} isOpen={showAddThreadModal} closeTimeoutMS={500} shouldCloseOnEsc={true} shouldCloseOnOverlayClick={true} onRequestClose={() => setShowAddThreadModal(false)}>
             <div className="modal-header mb-2">
                 <h5 className="modal-title">Crear Hilo</h5>
                 <button type="button" className="btn btn-close" onClick={() => setShowAddThreadModal(false)} />
@@ -131,7 +143,7 @@ const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, threads, se
                     </div>
                     <button type='submit' id='submitProcess' form='addProcess' className="btn btn-secondary col-md-12 mt-3 mb-2">Agregar Proceso</button>
 
-                    <div className='d-flex flex-row table-responsive mt-2 table-wrapper '>
+                    <div className='d-flex flex-row table-responsive mt-2 table-wrapper'>
                         <ProcessesTable processes={thread} />
                     </div>
 

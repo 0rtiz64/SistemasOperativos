@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 import TableContent from '../TableContent';
 
 
-const PriorityPreemtive = ({ processes, setProcesses }) => {
+const PriorityPreemtive = ({setProcessStatesHistory, processes, setProcesses }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
     useEffect(() => {
+        let processStatesHistory = [];
+
         if (processes[0].movements.length !== 0) {
             setRows([]);
             return;
@@ -26,6 +28,7 @@ const PriorityPreemtive = ({ processes, setProcesses }) => {
             .map((item) => {
                 return {
                     id: item.id,
+                    name: item.name,
                     arrivalTime: item.arrivalTime,
                     cpu: item.cpu,
                     priority: item.priority,
@@ -70,6 +73,7 @@ const PriorityPreemtive = ({ processes, setProcesses }) => {
             });
 
             const processToExecute = readyQueue[0];
+            processStatesHistory.push({ name: processToExecute.name, timeElapse: currentTime, state: "Ejecución" });
 
             const processATLessThanBT = [];
             for (let i = 0; i < processesInfo.length; i++) {
@@ -105,12 +109,12 @@ const PriorityPreemtive = ({ processes, setProcesses }) => {
 
                 if (item.priority < processToExecute.priority) {
                     remainingTime[processToExecute.id] -= amount;
+
                     readyQueue.push(item);
                     const prevCurrentTime = currentTime;
                     currentTime += amount;
 
                     addProcessMovement(processToExecute, prevCurrentTime, currentTime);
-
                     gotInterruption = true;
                     break;
                 }
@@ -146,7 +150,8 @@ const PriorityPreemtive = ({ processes, setProcesses }) => {
 
                     //Actualizamos los movimientos de ese proceso
                     addProcessMovement(processToExecute, processToExecute.arrivalTime, currentTime);
-
+                    processStatesHistory.pop();
+                    processStatesHistory.push({ name: processToExecute.name, timeElapse: processToExecute.arrivalTime, state: "Ejecución" });
 
                 } else {
                     const remainingT = remainingTime[processToExecute.id];
@@ -162,6 +167,7 @@ const PriorityPreemtive = ({ processes, setProcesses }) => {
                     }
 
                     addProcessMovement(processToExecute, prevCurrentTime, currentTime);
+
                 }
             }
 
@@ -178,11 +184,16 @@ const PriorityPreemtive = ({ processes, setProcesses }) => {
                 if (indexToRemoveRQ > -1) {
                     readyQueue.splice(indexToRemoveRQ, 1);
                 }
+                processStatesHistory.push({ name: processToExecute.name, timeElapse: currentTime, state: "Terminado" });
+            } else {
+                processStatesHistory.push({ name: processToExecute.name, timeElapse: currentTime, state: "Listo" });
             }
         }
 
         //Ordenamos en orden de llegada para mostrar en el grafico
         setRows(processes);
+        setProcessStatesHistory(processStatesHistory);
+
 
         //Ordenamos segun el orden de ejecución
         setRows(rows => rows = rows.sort((process1, process2) => {
@@ -205,7 +216,7 @@ const PriorityPreemtive = ({ processes, setProcesses }) => {
 
         setGreater(greater);
 
-    }, [processes, setProcesses]);
+    }, [processes, setProcesses, setProcessStatesHistory]);
 
 
     return (

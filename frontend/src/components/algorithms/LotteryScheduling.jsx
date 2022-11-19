@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import TableContent from '../TableContent';
 
-const LotteryScheduling = ({ processes, setProcesses, quantum }) => {
+const LotteryScheduling = ({ setProcessStatesHistory, processes, setProcesses, quantum }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
@@ -60,13 +60,14 @@ const LotteryScheduling = ({ processes, setProcesses, quantum }) => {
             return;
         }
 
+        let processStatesHistory = [];
+
         const resolve = () => {
 
             let tempRows = [];
             let ready = processes.map(item => ({ ...item }));  //Lista de listos
             let running = { id: 9999999, priority: 9999999, cpu: 9999999, movements: [] }; //Proceso que se esta ejecutando
             let seconds = 0; //Tiempo de cpu transcurrido
-            let blockeds = [];
             let globalTickets = ready.length * 5;
 
             let shareTicketsResults = shareTickets(ready);
@@ -77,6 +78,8 @@ const LotteryScheduling = ({ processes, setProcesses, quantum }) => {
                 const winner = findWinner(ready, globalTickets);
                 running = { ...ready[winner] };
 
+                processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Ejecución" });
+
                 if (quantum <= running.cpu) { //Restamos el tiempo de cpu
                     running.cpu -= quantum;
                     running.movements.push([seconds, seconds + quantum])
@@ -86,6 +89,7 @@ const LotteryScheduling = ({ processes, setProcesses, quantum }) => {
                     seconds += running.cpu;
                     running.cpu = 0;
                 }
+
 
                 //Agregamos el movimiento
                 let processesIndex;
@@ -115,13 +119,17 @@ const LotteryScheduling = ({ processes, setProcesses, quantum }) => {
                     shareTicketsResults = shareTickets(ready);
                     ready = shareTicketsResults[0];
                     globalTickets = shareTicketsResults[1];
+
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Terminado" });
                 } else {
                     ready[index].cpu = running.cpu;
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
                 }
 
-            } while (ready.length !== 0 || blockeds.length !== 0) //Seguir iterando mientras haya algun proceso
+            } while (ready.length !== 0) //Seguir iterando mientras haya algun proceso
         }
         resolve();
+        setProcessStatesHistory(processStatesHistory);
 
         setRows(rows => rows = rows.sort((process1, process2) => {
             if (process1.movements[0][0] > process2.movements[0][0]) return 1;
@@ -134,20 +142,20 @@ const LotteryScheduling = ({ processes, setProcesses, quantum }) => {
         let greater = 0;
 
         for (let j = 0; j < processes.length; j++) {
-          let item = processes[j];
-    
-          if (item.movements[item.movements.length - 1][1] > greater) {
-            greater = item.movements[item.movements.length - 1][1];
-          }
+            let item = processes[j];
+
+            if (item.movements[item.movements.length - 1][1] > greater) {
+                greater = item.movements[item.movements.length - 1][1];
+            }
         }
-    
+
         setGreater(greater);
-    
-    }, [processes, setProcesses, quantum])
+
+    }, [processes, setProcesses, quantum, setProcessStatesHistory])
 
     return (
-        <TableContent greater={greater} rows={rows} processes={processes}/>
-      )
+        <TableContent greater={greater} rows={rows} processes={processes} />
+    )
 }
 
 export default LotteryScheduling

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import TableContent from '../TableContent';
 
 
-const ShortestJobFirstNP = ({ processes, setProcesses, quantum }) => {
+const ShortestJobFirstNP = ({ setProcessStatesHistory, processes, setProcesses }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
@@ -24,24 +24,29 @@ const ShortestJobFirstNP = ({ processes, setProcesses, quantum }) => {
     }
 
     useEffect(() => {
-        if (isNaN(quantum) || isNaN(processes[0].cpu)) {
+        if (isNaN(processes[0].cpu)) {
             setRows([]);
             return;
         }
 
+        let tempRows = [];
+        let ready = processes.map(item => ({ ...item }));  //Lista de listos
+        let seconds = 0; //Tiempo de cpu transcurrido
+        let running;
+        let processStatesHistory = [];
+
         const resolve = () => {
-            let tempRows = [];
-            let ready = processes.map(item => ({ ...item }));  //Lista de listos
-            let seconds = 0; //Tiempo de cpu transcurrido
-            let running;
 
             do {
                 let index = 0;
                 running = { ...ready[nextProcess(ready)] };
 
+                processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Ejecución" });
                 running.movements.push([seconds, seconds + running.cpu])
                 seconds += running.cpu;
                 running.cpu = 0;
+                processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Terminado" });
+
 
                 let processesIndex;
                 for (let i = 0; i < processes.length; i++) {
@@ -68,6 +73,7 @@ const ShortestJobFirstNP = ({ processes, setProcesses, quantum }) => {
         }
 
         resolve();
+        setProcessStatesHistory(processStatesHistory);
 
         //Ordenamos segun el orden de ejecución
         setRows(rows => rows = rows.sort((process1, process2) => {
@@ -89,7 +95,7 @@ const ShortestJobFirstNP = ({ processes, setProcesses, quantum }) => {
         }
 
         setGreater(greater);
-    }, [processes, setProcesses, quantum])
+    }, [processes, setProcesses, setProcessStatesHistory])
 
 
     return (

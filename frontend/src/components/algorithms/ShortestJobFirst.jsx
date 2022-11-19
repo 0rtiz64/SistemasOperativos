@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import TableContent from '../TableContent';
 
 
-const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
+const ShortestJobFirst = ({ setProcessStatesHistory, processes, setProcesses, quantum }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
@@ -27,14 +27,14 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
     }
 
     useEffect(() => {
-        const resolve = () => {
-            let tempRows = [];
-            let ready = processes.map(item => ({ ...item }));  //Lista de listos
-            let running = { id: 9999999, priority: 9999999, cpu: 9999999, movements: [] }; //Proceso que se esta ejecutando
-            let seconds = 0; //Tiempo de cpu transcurrido
-            let blockeds = [];
-            let processStatesHistory = [];
+        let tempRows = [];
+        let ready = processes.map(item => ({ ...item }));  //Lista de listos
+        let running = { id: 9999999, priority: 9999999, cpu: 9999999, movements: [] }; //Proceso que se esta ejecutando
+        let seconds = 0; //Tiempo de cpu transcurrido
+        let blockeds = [];
+        let processStatesHistory = [];
 
+        const resolve = () => {
             do {
                 let index = 0;
                 let flag = false;
@@ -100,12 +100,13 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
                 }
 
                 setProcesses(tempProcesses);
-                //console.log(processStatesHistory);
 
             } while (ready.length !== 0 || blockeds.length !== 0);
         }
 
         resolve();
+        setProcessStatesHistory(processStatesHistory);
+
 
         let greater = 0;
 
@@ -127,8 +128,7 @@ const ShortestJobFirst = ({ processes, setProcesses, quantum }) => {
 
 
         setGreater(greater);
-
-    }, [processes, setProcesses, quantum])
+    }, [processes, setProcesses, quantum, setProcessStatesHistory])
 
 
     return (

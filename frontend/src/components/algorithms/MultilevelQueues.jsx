@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import TableContent from '../TableContent';
 
 
-const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
+const MultilevelQueues = ({ setProcessStatesHistory, processes, setProcesses, quantum }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
@@ -38,6 +38,7 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
         let running = { id: 9999999, priority: 9999999, cpu: 9999999, movements: [] }; //Proceso que se esta ejecutando
         let seconds = 0; //Tiempo de cpu transcurrido
         let blockeds = [];
+        let processStatesHistory = [];
 
         let median = Math.round(ready.length / 2);
         let queue1 = ready.slice(0, median);
@@ -46,20 +47,26 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
         const SJF = (ready) => {
             do {
                 let index = 0;
+                let flag = false;
 
                 if (blockeds.length === 1 && ready.length === 0) {
                     ready.push({ ...blockeds[0] });
                     running = { ...blockeds[0] };
                     blockeds = [];
+                    flag = true;
                 } else if (blockeds.length > 1 || (blockeds.length === 1 && blockeds[0].id !== running.id)) {
                     index = nextProcess(blockeds, running);
                     running = { ...blockeds[index] };
                     ready.push({ ...blockeds[index] });
                     blockeds.splice(index, 1);
+                    flag = true;
                 } else {
                     index = nextProcess(ready, running);
                     running = { ...ready[index] };
                 }
+
+                if (flag) processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
+                processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Ejecución" });
 
                 if (quantum <= running.cpu) { //Restamos el tiempo de cpu
                     running.cpu -= quantum;
@@ -71,6 +78,7 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
                     running.cpu = 0;
                 }
 
+                let tempProcesses = processes;
                 let processesIndex;
                 for (let i = 0; i < processes.length; i++) {
                     if (processes[i].id === running.id) {
@@ -78,9 +86,7 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
                     }
                 }
 
-                let tempProcesses = processes;
                 tempProcesses[processesIndex].movements = running.movements;
-                setProcesses(tempProcesses);
 
                 for (let i = 0; i < ready.length; i++) {
                     if (ready[i].id === running.id) {
@@ -90,13 +96,20 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
 
                 if (running.cpu === 0) {
                     tempRows.push(processes[processesIndex]);
+                    setRows(tempRows);
                     ready.splice(index, 1);
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Terminado" });
                 } else if (running.cpu > quantum) {
                     blockeds.push({ ...running });
                     ready.splice(index, 1);
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Bloqueado" });
+
                 } else {
                     ready[index].cpu = running.cpu;
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
                 }
+
+                setProcesses(tempProcesses);
 
             } while (ready.length !== 0 || blockeds.length !== 0);
         }
@@ -107,12 +120,20 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
 
             for (i = 0; j < ready.length; i = (i + 1) % ready.length) {
                 if (ready[i].cpu > 0 && seconds >= ready[i].arrivalTime) {
+                    if (ready[i].blocked === true) {
+                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Listo" });
+                        ready[i].blocked = false;
+                    }
+
+                    processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Ejecución" });
 
                     flag = true;
                     if (ready[i].cpu <= quantum) {
                         time = ready[i].cpu;
+                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds + time, state: "Terminado" });
                     } else {
                         time = quantum;
+                        if (ready[i].cpu - quantum <= quantum) processStatesHistory.push({ name: ready[i].name, timeElapse: seconds + time, state: "Listo" });
                     }
 
                     ready[i].movements.push([seconds, seconds + time])
@@ -123,6 +144,10 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
                     }
 
                     seconds += time;
+                    if (ready[i].cpu > quantum) {
+                        ready[i].blocked = true;
+                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Bloqueado" });
+                    }
                 }
                 if (i === ready.length - 1) {
                     if (!flag) {
@@ -148,6 +173,7 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
         RR(queue2);
         setRows(processes);
 
+
         //Ordenamos segun el orden de ejecución
         setRows(rows => rows = rows.sort((process1, process2) => {
             if (process1.movements[0][0] > process2.movements[0][0]) return 1;
@@ -168,8 +194,9 @@ const MultilevelQueues = ({ processes, setProcesses, quantum }) => {
         }
 
         setGreater(greater);
+        setProcessStatesHistory(processStatesHistory);
 
-    }, [processes, setProcesses, quantum])
+    }, [processes, setProcesses, quantum, setProcessStatesHistory])
 
     return (
         <TableContent greater={greater} rows={rows} processes={processes} />
