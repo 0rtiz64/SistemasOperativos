@@ -86,7 +86,6 @@ const Output = ({ statesHistoryTable, setStatesHistoryTable, processStatesHistor
                                                 </thead>
                                                 <tbody className='border-1' id='slider' align={'center'}>
                                                     {
-
                                                         statesHistoryTable.map((item, index) => {
                                                             return <tr className='slide-in' key={index} >
                                                                 <th className='text-center'>{index + 1}</th>
