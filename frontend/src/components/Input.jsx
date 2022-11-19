@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import AddThreadModal from './AddThreadModal'
 import ProcessesTable from './ProcessesTable';
 
-const Input = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, setQuantum }) => {
+const Input = ({setProcessStatesHistory, setStatesHistoryTable, outputRef, setProcessesList, setSelectedAlgorithm, setQuantum }) => {
     const [threads, setThreads] = useState([]);
     const [processes, setProcesses] = useState([]);
     const [selectedThread, setSelectedThread] = useState("");
@@ -62,11 +62,12 @@ const Input = ({ outputRef, setProcessesList, setSelectedAlgorithm, quantum, set
                 blocked: false,
             }
         })
+        setProcessStatesHistory([]);
+        setStatesHistoryTable([]);
 
         setSelectedAlgorithm(data.selectedAlgorithm);
         setQuantum(data.quantum);
         setProcessesList([...tempProcessesList]);
-
         outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
     }
 

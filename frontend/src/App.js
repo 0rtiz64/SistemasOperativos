@@ -11,6 +11,8 @@ const App = () => {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('1');
   const [processStatesHistory, setProcessStatesHistory] = useState([]);
   const [quantum, setQuantum] = useState("");
+  const [statesHistoryTable, setStatesHistoryTable] = useState([]);
+
   const outputRef = useRef(null);
 
   return (
@@ -26,8 +28,12 @@ const App = () => {
           setQuantum={setQuantum}
           processStatesHistory={processStatesHistory}
           setProcessStatesHistory={setProcessStatesHistory}
+          statesHistoryTable={statesHistoryTable}
+          setStatesHistoryTable={setStatesHistoryTable}
         />
         <Output
+          statesHistoryTable={statesHistoryTable}
+          setStatesHistoryTable={setStatesHistoryTable}
           outputRef={outputRef}
           processes={processesList}
           setProcesses={setProcessesList}

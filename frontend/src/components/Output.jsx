@@ -1,36 +1,32 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import Details from './Details'
 import Graphic from './Graphic'
 
-const Output = ({ processStatesHistory, setProcessStatesHistory, outputRef, selectedAlgorithm, processes, setProcesses, quantum }) => {
-    const [tabla, setTabla] = useState([]);
-
+const Output = ({ statesHistoryTable, setStatesHistoryTable, processStatesHistory, setProcessStatesHistory, outputRef, selectedAlgorithm, processes, setProcesses, quantum }) => {
     useEffect(() => {
-        setTabla([]);
-    }, [selectedAlgorithm]);
+        if (processStatesHistory.length === 0) {
+            return;
+        }
 
-    useEffect(() => {
-        if (processStatesHistory.length === 0) return;
-
-        let tAcumulado = 0;
-
-        setTimeout(function () {
-            let temp = [...tabla];
+        const interval = setInterval(function () {
+            if (processStatesHistory.length === 0) {
+                return;
+            }
+            let temp = [...statesHistoryTable];
             temp.push(processStatesHistory[0]);
-            setTabla(temp);
+            setStatesHistoryTable(temp)
 
             let t = [...processStatesHistory];
             t.splice(0, 1);
             setProcessStatesHistory(t);
+        }, 2000);
 
-        }, tAcumulado + 2000);
-        tAcumulado += 2000;
-        
-        // eslint-disable-next-line
-    }, [setProcessStatesHistory, processStatesHistory]);
+        return () => clearInterval(interval);
 
+    }, [statesHistoryTable, setProcessStatesHistory, processStatesHistory, setStatesHistoryTable]);
 
     /*
+
     <tr className='slide-in' key={index} >
                         <th className='text-center'>{index + 1}</th>
                         <td className='col'>{item.name}</td>
@@ -54,8 +50,6 @@ const Output = ({ processStatesHistory, setProcessStatesHistory, outputRef, sele
                         </td>
                     </tr>
     */
-
-
 
     return (
         <React.Fragment>
@@ -91,32 +85,31 @@ const Output = ({ processStatesHistory, setProcessStatesHistory, outputRef, sele
                                                     </tr>
                                                 </thead>
                                                 <tbody className='border-1' id='slider' align={'center'}>
-                                                    {tabla.length !== 0 &&
-                                                        tabla.map((item, index) => {
-                                                            return (
-                                                                <tr className='slide-in' key={index} >
-                                                                    <th className='text-center'>{index + 1}</th>
-                                                                    <td className='col'>{item.name}</td>
-                                                                    <td className='small'>{item.timeElapse}</td>
-                                                                    <td className='small'>
-                                                                        <div className='w-100 d-flex'>
-                                                                            {
-                                                                                item.state === 'Listo' &&
-                                                                                <span className='bg-primary text-center flex-fill rounded-1 text-white p-1'><strong>{item.state}</strong></span>
-                                                                            }{
-                                                                                item.state === 'Bloqueado' &&
-                                                                                <span className='bg-danger text-center flex-fill rounded-1 text-white p-1'><strong>{item.state}</strong></span>
-                                                                            }{
-                                                                                item.state === 'Ejecución' &&
-                                                                                <span className='bg-success text-center flex-fill rounded-1 text-white p-1'><strong>{item.state}</strong></span>
-                                                                            }{
-                                                                                item.state === 'Terminado' &&
-                                                                                <span className='bg-secondary text-center flex-fill rounded-1 text-white p-1'><strong>{item.state}</strong></span>
-                                                                            }
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            )
+                                                    {
+
+                                                        statesHistoryTable.map((item, index) => {
+                                                            return <tr className='slide-in' key={index} >
+                                                                <th className='text-center'>{index + 1}</th>
+                                                                <td className='col'>{item.name}</td>
+                                                                <td className='small'>{item.timeElapse}</td>
+                                                                <td className='small'>
+                                                                    <div className='w-100 d-flex'>
+                                                                        {
+                                                                            item.state === 'Listo' &&
+                                                                            <span className='bg-primary text-center flex-fill rounded-1 text-white p-1'><strong>{item.state}</strong></span>
+                                                                        }{
+                                                                            item.state === 'Bloqueado' &&
+                                                                            <span className='bg-danger text-center flex-fill rounded-1 text-white p-1'><strong>{item.state}</strong></span>
+                                                                        }{
+                                                                            item.state === 'Ejecución' &&
+                                                                            <span className='bg-success text-center flex-fill rounded-1 text-white p-1'><strong>{item.state}</strong></span>
+                                                                        }{
+                                                                            item.state === 'Terminado' &&
+                                                                            <span className='bg-secondary text-center flex-fill rounded-1 text-white p-1'><strong>{item.state}</strong></span>
+                                                                        }
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
                                                         })
                                                     }
                                                 </tbody>
