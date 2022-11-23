@@ -33,7 +33,7 @@ const Graphic = ({ setProcessStatesHistory, selectedAlgorithm, processes, setPro
     }
 
     return (
-        <table className={`table table-bordered ${(processes.length === 0) && "visually-hidden"}`}>
+        <table className={`block-column table table-bordered ${(processes.length === 0) && "visually-hidden"}`}>
             {
                 processes.length !== 0 &&
                 getGraphic()

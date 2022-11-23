@@ -27,6 +27,15 @@ body {
     max-width: auto;
     max-height: 180px;
     overflow: auto;
-    display:inline-block;
-  }
+    display: inline-block;
+}
 
+.block-column th:first-child,
+td:first-child {
+    position: sticky;
+    left: 0px;
+}
+
+td:first-child {
+    background-color: grey;
+}

@@ -64,6 +64,11 @@ const AddThreadModal = ({ showAddThreadModal, setShowAddThreadModal, setTrigger,
     const addThread = async (e) => {
         e.preventDefault();
 
+        if(thread.length === 0){
+            window.alert('No se puede guardar un hilo vacío.');
+            return;
+        }
+
         let payload = { nombreHilo: data.threadName, procesos: thread } //Data para el fetch
 
         await fetch('http://localhost:4000/api/languages/hilos', {

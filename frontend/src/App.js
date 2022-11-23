@@ -12,7 +12,6 @@ const App = () => {
   const [processStatesHistory, setProcessStatesHistory] = useState([]);
   const [quantum, setQuantum] = useState("");
   const [statesHistoryTable, setStatesHistoryTable] = useState([]);
-
   const outputRef = useRef(null);
 
   return (

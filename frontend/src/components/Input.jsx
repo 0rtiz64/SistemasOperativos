@@ -118,8 +118,8 @@ const Input = ({setProcessStatesHistory, setStatesHistoryTable, outputRef, setPr
                 <button form='setup' id='run' role={'link'} href='output' className="form-control btn btn-primary" type='submit'>Ejecutar</button>
             </div>
             {processes.length !== 0 &&
-                <div data-bs-toggle="collapse" href="#collapseExample">
-                    <div className='d-flex flex-row justify-content-between'>
+                <div>
+                    <div className='d-flex flex-row justify-content-between' data-bs-toggle="collapse" href="#collapseExample">
                         <div>
                             <label className='small mt-3'><strong>Procesos a ejecutar</strong></label>
                         </div>
