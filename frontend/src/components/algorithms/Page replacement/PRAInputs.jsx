@@ -82,7 +82,7 @@ const PRAInputs = ({ setTable, refs, setRefs, frames, setFrames }) => {
                     <input className='form-control me-2' onChange={handleInputChange} name='frames' value={data.frames} type={'number'} min='1' placeholder='ej. 3' />
                 </div>
                 <div className='col-md-3 flex-fill me-2'>
-                    <label className='small text-muted mt-2'><strong>Número de marcos</strong></label>
+                    <label className='small text-muted mt-2'><strong>Algoritmo</strong></label>
                     <select onChange={e => setData({ ...data, selectedPRA: e.target.value })} className='form-control me-2'>
                         <option value='1'>Optimo</option>
                         <option value='2'>FIFO</option>
