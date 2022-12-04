@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import TableContent from '../TableContent';
+import React, { useEffect, useState } from 'react'
+import TableContent from '../../TableContent';
 
 
-const ShortestJobFirst = ({ setProcessStatesHistory, processes, setProcesses, quantum }) => {
+
+const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, quantum }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
@@ -11,30 +12,36 @@ const ShortestJobFirst = ({ setProcessStatesHistory, processes, setProcesses, qu
             return item.id !== running.id
         });
 
-        let siguiente = arrayClon[0];
+        let next = arrayClon[0];
 
         if (arrayClon.length === 0) {
             return 0;
         }
 
-        arrayClon.forEach((item) => {
-            if (item.cpu < siguiente.cpu) {
-                siguiente = item;
+        arrayClon.forEach((item, index) => {
+            if (item.priority < next.priority) {
+                next = item;
             }
         });
 
-        return array.indexOf(siguiente);
+        return array.indexOf(next);
     }
 
     useEffect(() => {
-        let tempRows = [];
-        let ready = processes.map(item => ({ ...item }));  //Lista de listos
-        let running = { id: 9999999, priority: 9999999, cpu: 9999999, movements: [] }; //Proceso que se esta ejecutando
-        let seconds = 0; //Tiempo de cpu transcurrido
-        let blockeds = [];
+        if (processes[0].movements.length !== 0) {
+            setRows([]);
+            return;
+        }
+
         let processStatesHistory = [];
 
         const resolve = () => {
+            let tempRows = [];
+            let ready = processes.map(item => ({ ...item }));  //Lista de listos
+            let running = { id: 9999999, priority: 9999999, cpu: 9999999, movements: [] }; //Proceso que se esta ejecutando
+            let seconds = 0; //Tiempo de cpu transcurrido
+            let blockeds = [];
+
             do {
                 let index = 0;
                 let flag = false;
@@ -68,7 +75,6 @@ const ShortestJobFirst = ({ setProcessStatesHistory, processes, setProcesses, qu
                     running.cpu = 0;
                 }
 
-                let tempProcesses = processes;
                 let processesIndex;
                 for (let i = 0; i < processes.length; i++) {
                     if (processes[i].id === running.id) {
@@ -76,7 +82,9 @@ const ShortestJobFirst = ({ setProcessStatesHistory, processes, setProcesses, qu
                     }
                 }
 
+                let tempProcesses = processes;
                 tempProcesses[processesIndex].movements = running.movements;
+                setProcesses(tempProcesses);
 
                 for (let i = 0; i < ready.length; i++) {
                     if (ready[i].id === running.id) {
@@ -93,13 +101,10 @@ const ShortestJobFirst = ({ setProcessStatesHistory, processes, setProcesses, qu
                     blockeds.push({ ...running });
                     ready.splice(index, 1);
                     processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Bloqueado" });
-
                 } else {
                     ready[index].cpu = running.cpu;
                     processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
                 }
-
-                setProcesses(tempProcesses);
 
             } while (ready.length !== 0 || blockeds.length !== 0);
         }
@@ -107,7 +112,15 @@ const ShortestJobFirst = ({ setProcessStatesHistory, processes, setProcesses, qu
         resolve();
         setProcessStatesHistory(processStatesHistory);
 
-
+        //Ordenamos segun el orden de ejecución
+        setRows(rows => rows = rows.sort((process1, process2) => {
+            if (process1.movements[0][0] > process2.movements[0][0]) return 1;
+            if (process1.movements[0][0] < process2.movements[0][0]) return -1;
+            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return 1;
+            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return -1;
+            return 0;
+        }))
+        
         let greater = 0;
 
         for (let j = 0; j < processes.length; j++) {
@@ -118,22 +131,12 @@ const ShortestJobFirst = ({ setProcessStatesHistory, processes, setProcesses, qu
             }
         }
 
-        setRows(rows => rows = rows.sort((process1, process2) => {
-            if (process1.movements[0][0] > process2.movements[0][0]) return 1;
-            if (process1.movements[0][0] < process2.movements[0][0]) return -1;
-            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return 1;
-            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return -1;
-            return 0;
-        }))
-
-
         setGreater(greater);
     }, [processes, setProcesses, quantum, setProcessStatesHistory])
-
 
     return (
         <TableContent greater={greater} rows={rows} processes={processes} />
     )
 }
 
-export default ShortestJobFirst
+export default PriorityScheduling

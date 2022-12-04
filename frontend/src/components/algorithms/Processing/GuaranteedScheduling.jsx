@@ -1,6 +1,6 @@
 import React from 'react'
 import { useEffect, useState } from 'react';
-import TableContent from '../TableContent';
+import TableContent from '../../TableContent';
 
 const GuaranteedScheduling = ({ setProcessStatesHistory, processes, setProcesses, quantum }) => {
   const [rows, setRows] = useState([]);

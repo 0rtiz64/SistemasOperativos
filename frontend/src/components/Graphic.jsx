@@ -1,12 +1,12 @@
 import React from 'react'
-import GuaranteedScheduling from './algorithms/GuaranteedScheduling'
-import LotteryScheduling from './algorithms/LotteryScheduling'
-import MultilevelQueues from './algorithms/MultilevelQueues'
-import PriorityPreemtive from './algorithms/PriorityPreemtive'
-import PriorityScheduling from './algorithms/PriorityScheduling'
-import RoundRobin from './algorithms/RoundRobin'
-import ShortestJobFirst from './algorithms/ShortestJobFirst'
-import ShortestJobFirstNP from './algorithms/ShortestJobFirstNP'
+import GuaranteedScheduling from './algorithms/Processing/GuaranteedScheduling'
+import LotteryScheduling from './algorithms/Processing/LotteryScheduling'
+import MultilevelQueues from './algorithms/Processing/MultilevelQueues'
+import PriorityPreemtive from './algorithms/Processing/PriorityPreemtive'
+import PriorityScheduling from './algorithms/Processing/PriorityScheduling'
+import RoundRobin from './algorithms/Processing/RoundRobin'
+import ShortestJobFirst from './algorithms/Processing/ShortestJobFirst'
+import ShortestJobFirstNP from './algorithms/Processing/ShortestJobFirstNP'
 
 const Graphic = ({ setProcessStatesHistory, selectedAlgorithm, processes, setProcesses, quantum }) => {
     const getGraphic = () => {

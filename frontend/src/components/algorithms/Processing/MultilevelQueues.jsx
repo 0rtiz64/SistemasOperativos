@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import TableContent from '../TableContent';
+import TableContent from '../../TableContent';
+
 
 
 const MultilevelQueues = ({ setProcessStatesHistory, processes, setProcesses, quantum }) => {

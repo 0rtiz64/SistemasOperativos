@@ -1,6 +1,7 @@
 import React from 'react'
 import { useEffect, useState } from 'react';
-import TableContent from '../TableContent';
+import TableContent from '../../TableContent';
+
 
 
 const PriorityPreemtive = ({setProcessStatesHistory, processes, setProcesses }) => {

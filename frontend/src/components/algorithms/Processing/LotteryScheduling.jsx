@@ -1,30 +1,57 @@
-import React, { useEffect, useState } from 'react'
-import TableContent from '../TableContent';
+import React from 'react'
+import { useEffect, useState } from 'react';
+import TableContent from '../../TableContent';
 
-
-const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, quantum }) => {
+const LotteryScheduling = ({ setProcessStatesHistory, processes, setProcesses, quantum }) => {
     const [rows, setRows] = useState([]);
     const [greater, setGreater] = useState([]);
 
-    const nextProcess = (array, running) => {
-        let arrayClon = [...array].filter(item => {
-            return item.id !== running.id
-        });
+    const shareTickets = (list) => {
+        //El total de tickets a repartir va a ser 5 veces la cantidad de procesos
+        let toShareTickets = list.length * 5;
 
-        let next = arrayClon[0];
+        //El porcentaje de tickets a dar a cada proceso por unidad de prioridad
+        let sharePercentage = 0;
 
-        if (arrayClon.length === 0) {
+        list.forEach(item => {
+            sharePercentage += item.priority;
+        })
+
+        sharePercentage = 1 / sharePercentage;
+
+        let tempProcesses = list.map(item => ({ ...item }));
+        let newGlobalTickets = 0;
+
+        tempProcesses.forEach(item => {
+            newGlobalTickets += Math.round(item.priority * sharePercentage * toShareTickets);
+            item.tickets = newGlobalTickets;
+        })
+
+
+        return [tempProcesses, newGlobalTickets];
+    }
+
+    const findWinner = (list, globalTickets) => {
+        if (list.length === 1) {
             return 0;
         }
 
-        arrayClon.forEach((item, index) => {
-            if (item.priority < next.priority) {
-                next = item;
-            }
-        });
+        //Genera un número aleatorio entre 1 y la cantidad de tickets
+        const lotteryWinner = Math.floor(Math.random() * globalTickets) + 1;
+        let sum = 0;
 
-        return array.indexOf(next);
+        for (let index = 0; index < list.length; index++) {
+            sum += list[index].tickets;
+            if (sum >= lotteryWinner) {
+                return index;
+            }
+        }
     }
+
+    useEffect(() => {
+        return;
+    }, [setProcesses])
+
 
     useEffect(() => {
         if (processes[0].movements.length !== 0) {
@@ -35,33 +62,21 @@ const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, q
         let processStatesHistory = [];
 
         const resolve = () => {
+
             let tempRows = [];
             let ready = processes.map(item => ({ ...item }));  //Lista de listos
             let running = { id: 9999999, priority: 9999999, cpu: 9999999, movements: [] }; //Proceso que se esta ejecutando
             let seconds = 0; //Tiempo de cpu transcurrido
-            let blockeds = [];
+            let globalTickets = ready.length * 5;
+
+            let shareTicketsResults = shareTickets(ready);
+            ready = shareTicketsResults[0];
+            globalTickets = shareTicketsResults[1];
 
             do {
-                let index = 0;
-                let flag = false;
+                const winner = findWinner(ready, globalTickets);
+                running = { ...ready[winner] };
 
-                if (blockeds.length === 1 && ready.length === 0) {
-                    ready.push({ ...blockeds[0] });
-                    running = { ...blockeds[0] };
-                    blockeds = [];
-                    flag = true;
-                } else if (blockeds.length > 1 || (blockeds.length === 1 && blockeds[0].id !== running.id)) {
-                    index = nextProcess(blockeds, running);
-                    running = { ...blockeds[index] };
-                    ready.push({ ...blockeds[index] });
-                    blockeds.splice(index, 1);
-                    flag = true;
-                } else {
-                    index = nextProcess(ready, running);
-                    running = { ...ready[index] };
-                }
-
-                if (flag) processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
                 processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Ejecución" });
 
                 if (quantum <= running.cpu) { //Restamos el tiempo de cpu
@@ -74,6 +89,8 @@ const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, q
                     running.cpu = 0;
                 }
 
+
+                //Agregamos el movimiento
                 let processesIndex;
                 for (let i = 0; i < processes.length; i++) {
                     if (processes[i].id === running.id) {
@@ -85,6 +102,8 @@ const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, q
                 tempProcesses[processesIndex].movements = running.movements;
                 setProcesses(tempProcesses);
 
+                let index = 0;
+
                 for (let i = 0; i < ready.length; i++) {
                     if (ready[i].id === running.id) {
                         index = i;
@@ -95,31 +114,30 @@ const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, q
                     tempRows.push(processes[processesIndex]);
                     setRows(tempRows);
                     ready.splice(index, 1);
+
+                    shareTicketsResults = shareTickets(ready);
+                    ready = shareTicketsResults[0];
+                    globalTickets = shareTicketsResults[1];
+
                     processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Terminado" });
-                } else if (running.cpu > quantum) {
-                    blockeds.push({ ...running });
-                    ready.splice(index, 1);
-                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Bloqueado" });
                 } else {
                     ready[index].cpu = running.cpu;
                     processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
                 }
 
-            } while (ready.length !== 0 || blockeds.length !== 0);
+            } while (ready.length !== 0) //Seguir iterando mientras haya algun proceso
         }
-
         resolve();
         setProcessStatesHistory(processStatesHistory);
 
-        //Ordenamos segun el orden de ejecución
         setRows(rows => rows = rows.sort((process1, process2) => {
             if (process1.movements[0][0] > process2.movements[0][0]) return 1;
             if (process1.movements[0][0] < process2.movements[0][0]) return -1;
-            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return 1;
-            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return -1;
+            if (process1.movements[process1.movements.length - 1][1] > process2.movements[process2.movements.length - 1][1]) return 1;
+            if (process1.movements[process1.movements.length - 1][1] < process2.movements[process2.movements.length - 1][1]) return -1;
             return 0;
         }))
-        
+
         let greater = 0;
 
         for (let j = 0; j < processes.length; j++) {
@@ -131,6 +149,7 @@ const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, q
         }
 
         setGreater(greater);
+
     }, [processes, setProcesses, quantum, setProcessStatesHistory])
 
     return (
@@ -138,4 +157,4 @@ const PriorityScheduling = ({setProcessStatesHistory, processes, setProcesses, q
     )
 }
 
-export default PriorityScheduling
+export default LotteryScheduling

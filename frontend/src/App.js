@@ -12,6 +12,10 @@ const App = () => {
   const [processStatesHistory, setProcessStatesHistory] = useState([]);
   const [quantum, setQuantum] = useState("");
   const [statesHistoryTable, setStatesHistoryTable] = useState([]);
+  const [type, setType] = useState('1');
+  const [table, setTable] = useState({ stacks: [], faults: [] });
+  const [refs, setRefs] = useState([]);
+  const [frames, setFrames] = useState(0);
   const outputRef = useRef(null);
 
   return (
@@ -29,6 +33,13 @@ const App = () => {
           setProcessStatesHistory={setProcessStatesHistory}
           statesHistoryTable={statesHistoryTable}
           setStatesHistoryTable={setStatesHistoryTable}
+          setType={setType}
+          type={type}
+          setTable={setTable}
+          refs={refs}
+          setRefs={setRefs}
+          frames={frames}
+          setFrames={setFrames}
         />
         <Output
           statesHistoryTable={statesHistoryTable}
@@ -40,6 +51,12 @@ const App = () => {
           quantum={quantum}
           processStatesHistory={processStatesHistory}
           setProcessStatesHistory={setProcessStatesHistory}
+          type={type}
+          table={table}
+          refs={refs}
+          setRefs={setRefs}
+          frames={frames}
+          setFrames={setFrames}
         />
       </div>
       <Footer />
