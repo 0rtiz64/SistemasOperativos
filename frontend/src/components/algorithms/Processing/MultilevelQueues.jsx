@@ -115,63 +115,76 @@ const MultilevelQueues = ({ setProcessStatesHistory, processes, setProcesses, qu
             } while (ready.length !== 0 || blockeds.length !== 0);
         }
 
-        const RR = (ready) => {
-            let j = 0, time, i;
-            let flag = false;
+        const Priority = (ready) => {
+            do {
+                let index = 0;
+                let flag = false;
 
-            for (i = 0; j < ready.length; i = (i + 1) % ready.length) {
-                if (ready[i].cpu > 0 && seconds >= ready[i].arrivalTime) {
-                    if (ready[i].blocked === true) {
-                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Listo" });
-                        ready[i].blocked = false;
-                    }
-
-                    processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Ejecución" });
-
+                if (blockeds.length === 1 && ready.length === 0) {
+                    ready.push({ ...blockeds[0] });
+                    running = { ...blockeds[0] };
+                    blockeds = [];
                     flag = true;
-                    if (ready[i].cpu <= quantum) {
-                        time = ready[i].cpu;
-                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds + time, state: "Terminado" });
-                    } else {
-                        time = quantum;
-                        if (ready[i].cpu - quantum <= quantum) processStatesHistory.push({ name: ready[i].name, timeElapse: seconds + time, state: "Listo" });
-                    }
+                } else if (blockeds.length > 1 || (blockeds.length === 1 && blockeds[0].id !== running.id)) {
+                    index = nextProcess(blockeds, running);
+                    running = { ...blockeds[index] };
+                    ready.push({ ...blockeds[index] });
+                    blockeds.splice(index, 1);
+                    flag = true;
+                } else {
+                    index = nextProcess(ready, running);
+                    running = { ...ready[index] };
+                }
 
-                    ready[i].movements.push([seconds, seconds + time])
-                    ready[i].cpu -= time;
+                if (flag) processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
+                processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Ejecución" });
 
-                    if (ready[i].cpu === 0) {
-                        j++;
-                    }
+                if (quantum <= running.cpu) { //Restamos el tiempo de cpu
+                    running.cpu -= quantum;
+                    running.movements.push([seconds, seconds + quantum])
+                    seconds += quantum;
+                } else {
+                    running.movements.push([seconds, seconds + running.cpu])
+                    seconds += running.cpu;
+                    running.cpu = 0;
+                }
 
-                    seconds += time;
-                    if (ready[i].cpu > quantum) {
-                        ready[i].blocked = true;
-                        processStatesHistory.push({ name: ready[i].name, timeElapse: seconds, state: "Bloqueado" });
+                let processesIndex;
+                for (let i = 0; i < processes.length; i++) {
+                    if (processes[i].id === running.id) {
+                        processesIndex = i;
                     }
                 }
-                if (i === ready.length - 1) {
-                    if (!flag) {
-                        let it;
-                        let diff = 0;
-                        for (it = 0; it < ready.length; it++) {
-                            if (seconds < ready[it].arrivalTime) {
-                                if (diff === 0) {
-                                    diff = ready[it].arrivalTime - seconds;
-                                } else if (diff > ready[it].arrivalTime - seconds) {
-                                    diff = ready[it].arrivalTime - seconds;
-                                }
-                            }
-                            seconds += diff;
-                        }
+
+                let tempProcesses = processes;
+                tempProcesses[processesIndex].movements = running.movements;
+                setProcesses(tempProcesses);
+
+                for (let i = 0; i < ready.length; i++) {
+                    if (ready[i].id === running.id) {
+                        index = i;
                     }
-                    flag = false;
                 }
-            }
+
+                if (running.cpu === 0) {
+                    tempRows.push(processes[processesIndex]);
+                    setRows(tempRows);
+                    ready.splice(index, 1);
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Terminado" });
+                } else if (running.cpu > quantum) {
+                    blockeds.push({ ...running });
+                    ready.splice(index, 1);
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Bloqueado" });
+                } else {
+                    ready[index].cpu = running.cpu;
+                    processStatesHistory.push({ name: running.name, timeElapse: seconds, state: "Listo" });
+                }
+
+            } while (ready.length !== 0 || blockeds.length !== 0);
         }
 
         SJF(queue1);
-        RR(queue2);
+        Priority(queue2);
         setRows(processes);
 
 
